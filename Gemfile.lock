@@ -67,4 +67,5 @@ DEPENDENCIES
   kyotocabinet-ruby (~> 1.27)
   rdoc (~> 3.9)
   rspec (~> 2.13)
+  rspec-mocks (~> 2.13)
   tribe (~> 0.4)

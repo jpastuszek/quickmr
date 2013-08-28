@@ -1,8 +1,8 @@
-require 'tribe'
 require 'kyotocabinet'
 require 'zlib'
+require 'quickmr/processor_base'
 
-class Mapper < Tribe::DedicatedActor
+class Mapper < ProcessorBase
 	@@mapper_no = 0
 	def self.define(name = "Mapper#{@@mapper_no += 1}", &record_processor)
 		mapper = Class.new(Mapper) do
@@ -51,6 +51,11 @@ private
 			queue = Zlib.crc32(key) % queue_no
 			queues[queue].push([key, value])
 		end
+
+		# close the queues
+		queues.each do |queue|
+			queue.push nil
+		end
 	end
 
 	def each
@@ -59,15 +64,9 @@ private
 		end
 	end
 
-	def exception_handler(exception)
-		super
-		puts "#{self.class.name}[#{identifier}]: fatal: #{exception.exception}: #{exception.backtrace.join("\n")}"
-	end
-
 	def shutdown_handler(event)
 		super
 		@db.close
-		puts "#{self.class.name}[#{identifier}]: done"
 	end
 end
 
