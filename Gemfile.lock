@@ -30,6 +30,7 @@ GEM
     json (1.8.0)
     jwt (0.1.8)
       multi_json (>= 1.5)
+    kyotocabinet-ruby (1.27.1)
     multi_json (1.7.9)
     multi_xml (0.5.5)
     multipart-post (1.2.0)
@@ -63,6 +64,7 @@ PLATFORMS
 DEPENDENCIES
   cli (~> 1.1.0)
   jeweler (~> 1.8.4)
+  kyotocabinet-ruby (~> 1.27)
   rdoc (~> 3.9)
   rspec (~> 2.13)
   tribe (~> 0.4)

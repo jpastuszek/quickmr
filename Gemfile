@@ -4,6 +4,7 @@ ruby "1.9.3"
 
 gem "cli", "~> 1.1.0"
 gem "tribe", "~> 0.4"
+gem "kyotocabinet-ruby", "~> 1.27"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
