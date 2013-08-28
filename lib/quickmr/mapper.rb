@@ -15,20 +15,31 @@ class Mapper < Tribe::DedicatedActor
 		mapper
 	end
 
+	class Collector
+		def initialize(db)
+			@_db = db
+			@_seq = 0
+		end
+
+		def collect(key, value)
+			@_db['%s#%010i' % [key, @_seq += 1]] = value
+		end
+	end
+
 	def initialize(options)
 		super
 		
 		@db = KyotoCabinet::DB.new
 		@db.tune_encoding('utf-8')
 		@db.open('%')
-		@seq = 0
+
+		@collector = Collector.new(@db)
 	end
 
 private
+
 	def on_map(event)
-		key, value = *record_processor.call(event.data)
-		key or value or fail "expected key-value pair, got: '#{key}' => '#{value}'"
-		@db['%s#%010i' % [key, @seq += 1]] = value
+		@collector.instance_exec(event.data, &record_processor)
 	end
 
 	def on_flush!(event)

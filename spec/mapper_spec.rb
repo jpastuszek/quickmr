@@ -4,7 +4,7 @@ require 'quickmr/mapper'
 describe Mapper do
 	subject do
 		Mapper.define do |record|
-			next record % 10, record
+			collect(record % 10, record) if record < 90
 		end
 	end
 
@@ -35,9 +35,9 @@ describe Mapper do
 		mapper.shutdown!
 		while mapper.alive? do sleep 0.1 end
 
-		queue_reducer1.length.should == 20
-		queue_reducer2.length.should == 50
-		queue_reducer3.length.should == 30
+		queue_reducer1.length.should == 18
+		queue_reducer2.length.should == 45
+		queue_reducer3.length.should == 27
 
 		#queue_reducer1.length.times{p queue_reducer1.pop}
 		#puts
