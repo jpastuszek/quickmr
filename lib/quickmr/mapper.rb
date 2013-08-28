@@ -36,26 +36,32 @@ class Mapper < ProcessorBase
 		@collector = Collector.new(@db)
 	end
 
-private
-
-	def on_map(event)
-		@collector.instance_exec(event.data, &record_processor)
+	def queues(queues)
+		@queues = queues
 	end
 
-	def on_flush!(event)
-		puts "#{self.class.name}[#{identifier}]: flusing..."
-		queues = event.data
-		queue_no = queues.length
+private
 
-		each do |key, value|
-			queue = Zlib.crc32(key) % queue_no
-			queues[queue].push([key, value])
-		end
+	def on_data(event)
+		if not event.data
+			shutdown!
 
-		# close the queues
-		queues.each do |queue|
-			queue.push nil
+			queue_no = @queues.length
+			puts "#{self.class.name}[#{identifier}]: flusing to #{queue_no} queues"
+
+			each do |key, value|
+				queue = Zlib.crc32(key) % queue_no
+				@queues[queue].push([key, value])
+			end
+
+			# close the queues
+			@queues.each do |queue|
+				queue.push nil
+			end
+
+			return
 		end
+		@collector.instance_exec(*event.data, &record_processor)
 	end
 
 	def each

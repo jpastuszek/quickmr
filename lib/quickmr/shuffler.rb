@@ -31,9 +31,13 @@ private
 				end
 			end
 			break unless min
-			@processor.message! :reduce, *last[min] if @processor
+			@processor.message! :data, last[min] if @processor
 			last[min] = queues[min].pop
 		end
+
+		# end of data
+		@processor.message! :data, nil if @processor
+		shutdown!
 	end
 end
 

@@ -48,13 +48,12 @@ describe Shuffler do
 
 		shuffler.deliver_message! :flush!, [queue_reducer1, queue_reducer2, queue_reducer3]
 
-		shuffler.shutdown!
 		while shuffler.alive? do sleep 0.1 end
 
 		queue_reducer1.should be_empty
 		queue_reducer2.should be_empty
 		queue_reducer3.should be_empty
-		processor_messages.should == [[:reduce, 1, 1], [:reduce, 1, 2], [:reduce, 2, 1], [:reduce, 2, 2], [:reduce, 3, 1], [:reduce, 3, 2], [:reduce, 4, 1], [:reduce, 4, 2], [:reduce, 5, 1], [:reduce, 5, 2], [:reduce, 6, 1], [:reduce, 6, 2], [:reduce, 7, 1], [:reduce, 7, 2]]
+		processor_messages.should == [[:data, [1, 1]], [:data, [1, 2]], [:data, [2, 1]], [:data, [2, 2]], [:data, [3, 1]], [:data, [3, 2]], [:data, [4, 1]], [:data, [4, 2]], [:data, [5, 1]], [:data, [5, 2]], [:data, [6, 1]], [:data, [6, 2]], [:data, [7, 1]], [:data, [7, 2]], [:data, nil]]
 	end
 end
 

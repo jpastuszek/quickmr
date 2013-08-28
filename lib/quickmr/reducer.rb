@@ -25,6 +25,10 @@ class Reducer < ProcessorBase
 		def collect(key, value)
 			@processor.message! :data, [key, value] if @processor
 		end
+
+		def shutdown!
+			@processor.message! :data, nil if @processor
+		end
 	end
 
 	def initialize(options)
@@ -37,7 +41,12 @@ class Reducer < ProcessorBase
 	end
 
 private
-	def on_reduce(event)
+	def on_data(event)
+		if not event.data
+			shutdown!
+			@collector.shutdown!
+			return
+		end
 		@collector.instance_exec(*event.data, &record_processor)
 	end
 end

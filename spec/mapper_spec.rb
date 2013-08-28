@@ -3,8 +3,8 @@ require 'quickmr/mapper'
 
 describe Mapper do
 	subject do
-		Mapper.define do |record|
-			collect(record % 10, record) if record < 90
+		Mapper.define do |key, value|
+			collect(value % 10, value) if value < 90
 		end
 	end
 
@@ -26,13 +26,13 @@ describe Mapper do
 
 	it 'should produce key value records with given block' do
 		mapper = Tribe.root.spawn(subject)
+		mapper.queues([queue_reducer1, queue_reducer2, queue_reducer3])
+
 		(0...100).each do |no|
-			mapper.deliver_message! :map, no
+			mapper.deliver_message! :data, [nil, no]
 		end
+		mapper.deliver_message! :data, nil # flush
 
-		mapper.deliver_message! :flush!, [queue_reducer1, queue_reducer2, queue_reducer3]
-
-		mapper.shutdown!
 		while mapper.alive? do sleep 0.1 end
 
 		queue_reducer1.length.should == 19
