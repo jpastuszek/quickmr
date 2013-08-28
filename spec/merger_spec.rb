@@ -1,7 +1,7 @@
 require_relative 'spec_helper'
-require 'quickmr/shuffler'
+require 'quickmr/merger'
 
-describe Shuffler do
+describe Merger do
 	let :queue_reducer1 do
 		q = Queue.new
 		q.push [1, 1]
@@ -35,7 +35,7 @@ describe Shuffler do
 	end
 
 	subject do
-		Shuffler
+		Merger
 	end
 
 	it 'should provide records in key order from many queues' do
@@ -43,12 +43,12 @@ describe Shuffler do
 		processor_messages = []
 		processor.stub(:message!) {|*args| processor_messages << args}
 
-		shuffler = Tribe.root.spawn(subject)
-		shuffler.connect(processor)
+		merger = Tribe.root.spawn(subject)
+		merger.connect(processor)
 
-		shuffler.deliver_message! :flush!, [queue_reducer1, queue_reducer2, queue_reducer3]
+		merger.deliver_message! :flush!, [queue_reducer1, queue_reducer2, queue_reducer3]
 
-		while shuffler.alive? do sleep 0.1 end
+		while merger.alive? do sleep 0.1 end
 
 		queue_reducer1.should be_empty
 		queue_reducer2.should be_empty

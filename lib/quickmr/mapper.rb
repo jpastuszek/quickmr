@@ -1,5 +1,4 @@
 require 'kyotocabinet'
-require 'zlib'
 require 'quickmr/processor_base'
 
 class Mapper < ProcessorBase
@@ -21,8 +20,28 @@ class Mapper < ProcessorBase
 			@_seq = 0
 		end
 
+		def processor(processor)
+			@processor = processor
+		end
+
 		def collect(key, value)
 			@_db['%s#%010i' % [key, @_seq += 1]] = value
+		end
+
+		def flush!
+			# send sorted data by key
+			each do |key, value|
+				@processor.message! :data, [key, value]
+			end
+			@processor.message! :data, nil
+		end
+
+		private
+
+		def each
+			@_db.each do |key, value|
+				yield key[0..-12], value
+			end
 		end
 	end
 
@@ -36,8 +55,8 @@ class Mapper < ProcessorBase
 		@collector = Collector.new(@db)
 	end
 
-	def queues(queues)
-		@queues = queues
+	def connect(processor)
+		@collector.processor(processor)
 	end
 
 private
@@ -45,29 +64,11 @@ private
 	def on_data(event)
 		if not event.data
 			shutdown!
-
-			queue_no = @queues.length
-			puts "#{self.class.name}[#{identifier}]: flusing to #{queue_no} queues"
-
-			each do |key, value|
-				queue = Zlib.crc32(key) % queue_no
-				@queues[queue].push([key, value])
-			end
-
-			# close the queues
-			@queues.each do |queue|
-				queue.push nil
-			end
-
+			puts "#{self.class.name}[#{identifier}]: flusing..."
+			@collector.flush!
 			return
 		end
 		@collector.instance_exec(*event.data, &record_processor)
-	end
-
-	def each
-		@db.each do |key, value|
-			yield key[0..-12], value
-		end
 	end
 
 	def shutdown_handler(event)

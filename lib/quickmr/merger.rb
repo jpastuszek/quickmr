@@ -1,6 +1,6 @@
 require 'quickmr/processor_base'
 
-class Shuffler < ProcessorBase
+class Merger < ProcessorBase
 	def connect(processor)
 		@processor = processor
 	end
