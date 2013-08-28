@@ -39,8 +39,7 @@ describe Shuffler do
 	end
 
 	it 'should provide records in key order from many queues' do
-		StubProcessor = Class.new
-		processor = StubProcessor.new
+		processor = Class.new
 		processor_messages = []
 		processor.stub(:message!) {|*args| processor_messages << args}
 
