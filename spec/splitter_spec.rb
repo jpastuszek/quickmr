@@ -34,10 +34,6 @@ describe Splitter do
 
 		while splitter.alive? do sleep 0.1 end
 
-		#queue_reducer1.length.should == 19
-		#queue_reducer2.length.should == 46
-		#queue_reducer3.length.should == 28
-
 		# 7 and 9 + nil
 		(0...queue_reducer1.length).map{queue_reducer1.pop}.should == [["7", "7"], ["7", "17"], ["7", "27"], ["7", "37"], ["7", "47"], ["7", "57"], ["7", "67"], ["7", "77"], ["7", "87"], ["9", "9"], ["9", "19"], ["9", "29"], ["9", "39"], ["9", "49"], ["9", "59"], ["9", "69"], ["9", "79"], ["9", "89"], nil]
 		
