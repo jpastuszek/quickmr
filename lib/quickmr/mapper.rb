@@ -15,25 +15,25 @@ class Mapper < ProcessorBase
 	end
 
 	class Collector
-		def initialize(db)
+		def initialize(parent, db)
+			@parent = parent
 			@_db = db
 			@_seq = 0
 		end
 
-		def processor(processor)
-			@processor = processor
-		end
-
 		def collect(key, value)
+			@parent.debug{"collecting: #{[key, value]}"}
 			@_db['%s#%010i' % [key.to_s, @_seq += 1]] = Marshal.dump([key, value])
 		end
 
 		def flush!
+			@parent.log 'flusing...'
 			# send sorted data by key
 			each do |key, value|
-				@processor.message! :data, [key, value]
+				@parent.debug{"flushing: #{[key, value]}"}
+				@parent.output [key, value]
 			end
-			@processor.message! :data, nil
+			@parent.output nil
 		end
 
 		private
@@ -52,22 +52,18 @@ class Mapper < ProcessorBase
 		@db.tune_encoding('utf-8')
 		@db.open('%')
 
-		@collector = Collector.new(@db)
-	end
-
-	def connect(processor)
-		@collector.processor(processor)
+		@collector = Collector.new(self, @db)
 	end
 
 private
 
 	def on_data(event)
 		if not event.data
-			shutdown!
-			puts "#{self.class.name}[#{identifier}]: flusing..."
 			@collector.flush!
+			shutdown!
 			return
 		end
+		debug{"data: #{event.data}"}
 		@collector.instance_exec(*event.data, &record_processor)
 	end
 

@@ -24,7 +24,7 @@ describe Reducer do
 	it 'should provide key value records from sorted input records' do
 		processor = Class.new
 		processor_messages = []
-		processor.stub(:message!) {|*args| processor_messages << args}
+		processor.stub(:deliver_message!) {|*args| processor_messages << args}
 
 		reducer = Tribe.root.spawn(subject)
 		reducer.connect(processor)

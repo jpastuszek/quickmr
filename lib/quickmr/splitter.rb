@@ -9,6 +9,7 @@ class Splitter < ProcessorBase
 		(options[:queue_no] || fail('need queue number')).times do
 			@queues << SizedQueue.new(options[:queue_size] || 1000)
 		end
+		log "splitter initailized with #{@queues.length} queues"
 	end
 
 	def queues
@@ -17,19 +18,21 @@ class Splitter < ProcessorBase
 private
 
 	def on_data(event)
+		debug{"data: #{event.data}"}
 		if not event.data
-			shutdown!
-
 			# close the queues
 			@queues.each do |queue|
 				queue.push nil
 			end
 
-			puts "#{self.class.name}[#{identifier}]: done filling queues"
+			log "done filling queues"
+			shutdown!
 			return
 		end
 
-		@queues[Zlib.crc32(event.data.first.to_s) % @queues.length].push(event.data)
+		queue_no = Zlib.crc32(event.data.first.to_s) % @queues.length
+		debug{"enqueuing #{event.data} to queue #{queue_no}"}
+		@queues[queue_no].push(event.data)
 	end
 end
 

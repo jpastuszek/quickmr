@@ -11,7 +11,7 @@ describe Mapper do
 	it 'should produce key value records with given block' do
 		processor = Class.new
 		processor_messages = []
-		processor.stub(:message!) {|*args| processor_messages << args}
+		processor.stub(:deliver_message!) {|*args| processor_messages << args}
 
 		mapper = Tribe.root.spawn(subject)
 		mapper.connect(processor)

@@ -41,7 +41,7 @@ describe Merger do
 	it 'should provide records in key order from many queues' do
 		processor = Class.new
 		processor_messages = []
-		processor.stub(:message!) {|*args| processor_messages << args}
+		processor.stub(:deliver_message!) {|*args| processor_messages << args}
 
 		merger = Tribe.root.spawn(subject)
 		merger.connect(processor)

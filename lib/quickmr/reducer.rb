@@ -14,33 +14,26 @@ class Reducer < ProcessorBase
 	end
 
 	class Collector
-		def initialize
-			@processor = nil
-		end
-
-		def processor(processor)
-			@processor = processor
+		def initialize(parent)
+			@parent = parent
 		end
 
 		def collect(key, value)
-			@processor.message! :data, [key, value]
+			@parent.output [key, value]
 		end
 
 		def flush!
-			@processor.message! :data, nil
+			@parent.output nil
 		end
 	end
 
 	def initialize(options)
 		super
-		@collector = Collector.new
-	end
-
-	def connect(processor)
-		@collector.processor(processor)
+		@collector = Collector.new(self)
 	end
 
 private
+
 	def on_data(event)
 		if not event.data
 			shutdown!

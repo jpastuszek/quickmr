@@ -1,10 +1,6 @@
 require 'quickmr/processor_base'
 
 class Merger < ProcessorBase
-	def connect(processor)
-		@processor = processor
-	end
-
 private
 	def on_flush!(event)
 		# note that each queue needs to end with nil!
@@ -31,12 +27,12 @@ private
 				end
 			end
 			break unless min
-			@processor.message! :data, last[min] if @processor
+			output last[min] if @processor
 			last[min] = queues[min].pop
 		end
 
 		# end of data
-		@processor.message! :data, nil if @processor
+		output nil if @processor
 		shutdown!
 	end
 end
