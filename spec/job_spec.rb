@@ -9,16 +9,12 @@ describe Job do
 			end
 
 			reducer(2) do |key, value|
-				@last_key = nil unless defined? @last_key
-				@sum = 0 unless defined? @sum
-
-				if key != @last_key
-					collect(@last_key, @sum) if @last_key
-					@sum = 0
-					@last_key = key
+				each_key do |key, values|
+					sum = values.inject(0) do |sum, value|
+						sum + value
+					end
+					collect(key, sum)
 				end
-
-				@sum += value
 			end
 		end
 	end
@@ -37,7 +33,7 @@ describe Job do
 
 		while job.alive? do sleep 0.1 end
 
-		p processor_messages
+		processor_messages.sort_by{|i| i.last and i.last.first or 99}.should == [[:data, [0, 10]], [:data, [1, 12]], [:data, [2, 14]], [:data, [3, 16]], [:data, [4, 18]], [:data, [5, 20]], [:data, [6, 22]], [:data, [7, 24]], [:data, [8, 26]], [:data, [9, 28]], [:data, nil]]
 	end
 end
 

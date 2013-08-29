@@ -11,6 +11,17 @@ describe Reducer do
 		end | [nil]
 	end
 
+	let :processor do
+		processor = Class.new
+		@processor_messages = []
+		processor.stub(:deliver_message!) {|*args| processor_messages << args}
+		processor
+	end
+
+	let :processor_messages do
+		@processor_messages = []
+	end
+
 	describe 'basic reducer structure' do
 		subject do
 			# sum base for each modulo
@@ -36,17 +47,38 @@ describe Reducer do
 		end
 
 		it 'should provide key value records from sorted input records' do
-			processor = Class.new
-			processor_messages = []
-			processor.stub(:deliver_message!) {|*args| processor_messages << args}
-
 			reducer = Tribe.root.spawn(subject)
 			reducer.connect(processor)
 
 			data.each do |pair|
 				reducer.deliver_message! :data, pair
 			end
-			
+			while reducer.alive? do sleep 0.1 end
+
+			processor_messages.should == [[:data, [0, 10]], [:data, [1, 12]], [:data, [2, 14]], [:data, [3, 16]], [:data, [4, 18]], [:data, [5, 20]], [:data, [6, 22]], [:data, [7, 24]], [:data, [8, 26]], [:data, [9, 28]], [:data, nil]]
+		end
+	end
+
+	describe 'reducer with grouping block' do
+		subject do
+			# sum base for each modulo
+			Reducer.define do |key, value|
+				each_key do |key, values|
+					sum = values.inject(0) do |sum, value|
+						sum + value
+					end
+					collect(key, sum)
+				end
+			end
+		end
+
+		it 'should provide key value records from sorted input records' do
+			reducer = Tribe.root.spawn(subject)
+			reducer.connect(processor)
+
+			data.each do |pair|
+				reducer.deliver_message! :data, pair
+			end
 			while reducer.alive? do sleep 0.1 end
 
 			processor_messages.should == [[:data, [0, 10]], [:data, [1, 12]], [:data, [2, 14]], [:data, [3, 16]], [:data, [4, 18]], [:data, [5, 20]], [:data, [6, 22]], [:data, [7, 24]], [:data, [8, 26]], [:data, [9, 28]], [:data, nil]]
