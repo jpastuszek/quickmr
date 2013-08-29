@@ -2,10 +2,18 @@ require 'zlib'
 require 'quickmr/processor_base'
 
 class Splitter < ProcessorBase
-	def queues(queues)
-		@queues = queues
+	def initialize(options)
+		super
+		@queues = []
+
+		(options[:queue_no] || fail('need queue number')).times do
+			@queues << SizedQueue.new(options[:queue_size] || 1000)
+		end
 	end
 
+	def queues
+		@queues
+	end
 private
 
 	def on_data(event)
