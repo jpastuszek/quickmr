@@ -39,7 +39,7 @@ class Reducer < ProcessorBase
 		end
 
 		def key(key)
-			@fiber.resume nil
+			@fiber.resume :_force_each_stop
 			@fiber.resume key
 		end
 
@@ -48,17 +48,23 @@ class Reducer < ProcessorBase
 		end
 
 		def finish
-			@fiber.resume nil
+			@fiber.resume :_force_each_stop
 		end
 	end
 
 	class Values
 		include Enumerable
 
+		def initialize
+			@run_once = false
+		end
+
 		def each(&block)
+			fail 'values is not rewindable' if @run_once
+			@run_once = true
 			loop do
 				value = Fiber.yield
-				break unless value
+				break if value == :_force_each_stop
 				yield value
 			end
 		end
@@ -106,7 +112,7 @@ private
 		if @on_each_key 
 			@each_key_controler = EachKeyControler.new(@collector, &@on_each_key) if not @each_key_controler
 
-			key = event.data.first
+			key = event.data.first or fail 'nil key not allowed'
 
 			if not @last_key or key != @last_key
 				debug{"key changed"}
