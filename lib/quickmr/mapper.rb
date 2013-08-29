@@ -25,7 +25,7 @@ class Mapper < ProcessorBase
 		end
 
 		def collect(key, value)
-			@_db['%s#%010i' % [key, @_seq += 1]] = value
+			@_db['%s#%010i' % [key.to_s, @_seq += 1]] = Marshal.dump([key, value])
 		end
 
 		def flush!
@@ -39,8 +39,8 @@ class Mapper < ProcessorBase
 		private
 
 		def each
-			@_db.each do |key, value|
-				yield key[0..-12], value
+			@_db.each do |key, pair|
+				yield *Marshal.load(pair)
 			end
 		end
 	end

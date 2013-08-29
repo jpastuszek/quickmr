@@ -23,7 +23,7 @@ describe Mapper do
 
 		while mapper.alive? do sleep 0.1 end
 
-		processor_messages.should == [[:data, ["0", "0"]], [:data, ["0", "3"]], [:data, ["0", "6"]], [:data, ["1", "1"]], [:data, ["1", "4"]], [:data, ["1", "7"]], [:data, ["2", "2"]], [:data, ["2", "5"]], [:data, ["2", "8"]], [:data, nil]]
+		processor_messages.should == [[:data, [0, 0]], [:data, [0, 3]], [:data, [0, 6]], [:data, [1, 1]], [:data, [1, 4]], [:data, [1, 7]], [:data, [2, 2]], [:data, [2, 5]], [:data, [2, 8]], [:data, nil]]
 	end
 end
 
