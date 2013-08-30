@@ -60,7 +60,7 @@ class ProcessorBase < Tribe::DedicatedActor
 private
 	def exception_handler(exception)
 		super
-		log "fatal: #{exception.exception}: #{exception.backtrace.join("\n")}"
+		log "fatal: #{exception.exception}:\n#{exception.backtrace.join("\n")}"
 	end
 
 	def shutdown_handler(event)

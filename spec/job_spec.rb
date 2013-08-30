@@ -20,20 +20,19 @@ describe Job do
 	end
 
 	it 'should process input into output data according to MR algrithm' do
-		processor = Class.new
 		processor_messages = []
-		processor.stub(:deliver_message!) {|*args| processor_messages << args}
 
 		job = Tribe.root.spawn(subject)
-		job.connect(processor)
-		(0...20).each do |no|
-			job.deliver_message! :data, [nil, no]
+		job.output do |key, value|
+			processor_messages << [key, value]
 		end
-		job.deliver_message! :data, nil # flush
 
-		while job.alive? do sleep 0.1 end
+		(0...20).each do |no|
+			job.process nil, no
+		end
+		job.done
 
-		processor_messages.sort_by{|i| i.last and i.last.first or 99}.should == [[:data, [0, 10]], [:data, [1, 12]], [:data, [2, 14]], [:data, [3, 16]], [:data, [4, 18]], [:data, [5, 20]], [:data, [6, 22]], [:data, [7, 24]], [:data, [8, 26]], [:data, [9, 28]], [:data, nil]]
+		processor_messages.sort_by{|i| i.first or 99}.should == [[0, 10], [1, 12], [2, 14], [3, 16], [4, 18], [5, 20], [6, 22], [7, 24], [8, 26], [9, 28]]
 	end
 end
 

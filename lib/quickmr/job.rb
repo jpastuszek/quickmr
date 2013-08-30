@@ -19,6 +19,7 @@ class Job < ProcessorBase
 	end
 
 	def initialize(options)
+		root_logger(Logger.new(STDERR))
 		super
 
 		@mappers = []
@@ -56,6 +57,8 @@ class Job < ProcessorBase
 			reducer.connect(@output)
 		end
 
+		@output.connect(self, :output)
+
 		@mapping_sequence = 0
 	end
 
@@ -71,12 +74,17 @@ class Job < ProcessorBase
 		end
 	end
 
-	def connect(processor)
-		@output.connect(processor)
+	def output(&block)
+		@on_output = block
 	end
 
-	def alive?
-		@output.alive?
+	def process(key, value)
+		deliver_message!(:data, [key, value])
+	end
+
+	def done
+		deliver_message! :data, nil # flush
+		while alive? do sleep 0.1 end
 	end
 
 private
@@ -87,11 +95,18 @@ private
 			@mappers.each do |mapper|
 				mapper.deliver_message! :data, nil
 			end
-			#shutdown!
 			return
 		end
 		@mappers[@mapping_sequence % @mappers.length].deliver_message! :data, event.data
 		@mapping_sequence += 1
+	end
+
+	def on_output(event)
+		if not event.data
+			shutdown!
+			return
+		end
+		@on_output.call(*event.data) if @on_output
 	end
 end
 
