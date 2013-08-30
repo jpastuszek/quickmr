@@ -19,8 +19,9 @@ class Job < ProcessorBase
 	end
 
 	def initialize(options)
-		root_logger(Logger.new(STDERR))
-		super
+		@logger = Logger.new(STDERR)
+		@logger.level = Logger::WARN
+		super options.merge(logger: @logger)
 
 		@mappers = []
 		@reducers = []
@@ -87,10 +88,18 @@ class Job < ProcessorBase
 		while alive? do sleep 0.1 end
 	end
 
+	def show_info
+		@logger.level = Logger::INFO
+	end
+
+	def show_debug
+		@logger.level = Logger::DEBUG
+	end
+
 private
 	
 	def on_data(event)
-		log "input: #{event.data}"
+		debug{"input: #{event.data}"}
 		if not event.data
 			@mappers.each do |mapper|
 				mapper.deliver_message! :data, nil

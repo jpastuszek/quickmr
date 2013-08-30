@@ -16,7 +16,9 @@ class ProcessorBase < Tribe::DedicatedActor
 
 	def initialize(options)
 		super
-		if options[:parent].respond_to? :logger
+		if options[:logger]
+			root_logger(options[:logger]) 
+		elsif options[:parent].respond_to? :logger
 			root_logger(options[:parent].logger) 
 		else
 			root_logger(Logger.new(STDERR))
