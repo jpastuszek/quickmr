@@ -18,6 +18,10 @@ class Job < ProcessorBase
 		job
 	end
 
+	def self.start
+		Tribe.root.spawn(self)
+	end
+
 	def initialize(options)
 		@logger = Logger.new(STDERR)
 		@logger.level = Logger::WARN

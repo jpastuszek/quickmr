@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "quickmr"
   gem.homepage = "http://github.com/jpastuszek/quickmr"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Single process map-reduce}
+  gem.description = %Q{In porcess multithreaded map-reduce framework}
   gem.email = "jpastuszek@gmail.com"
   gem.authors = ["Jakub Pastuszek"]
   # dependencies defined in Gemfile
@@ -42,7 +42,7 @@ Cucumber::Rake::Task.new(:features)
 task :default => :spec
 
 require 'rdoc/task'
-Rake::RDocTask.new do |rdoc|
+RDoc::Task.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'

@@ -16,7 +16,7 @@ private
 				log "all reducers done, shutting down"
 				shutdown! 
 			else
-				log "waiting for #{@reducers_alive} to finish"
+				log "waiting for #{@reducers_alive} reducers to finish"
 			end
 			return
 		end

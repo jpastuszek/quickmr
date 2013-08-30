@@ -19,15 +19,18 @@ class Mapper < ProcessorBase
 			@parent = parent
 			@_db = db
 			@_seq = 0
+			@_total_collections = 0
 		end
 
 		def collect(key, value)
 			@parent.debug{"collecting: #{[key, value]}"}
+			fail 'key cannot be nil' unless key
 			@_db['%s#%010i' % [key.to_s, @_seq += 1]] = Marshal.dump([key, value])
+			@_total_collections += 1
 		end
 
 		def flush!
-			@parent.log 'flusing...'
+			@parent.log "collected #{@_total_collections} records; flushing..."
 			# send sorted data by key
 			each do |key, value|
 				@parent.debug{"flushing: #{[key, value]}"}

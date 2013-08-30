@@ -17,13 +17,16 @@ class Reducer < ProcessorBase
 	class Collector
 		def initialize(parent)
 			@parent = parent
+			@_total_collections = 0
 		end
 
 		def collect(key, value)
 			@parent.output [key, value]
+			@_total_collections += 1
 		end
 
 		def flush!
+			@parent.log "collected #{@_total_collections} records"
 			@parent.output nil
 		end
 	end
@@ -78,6 +81,7 @@ class Reducer < ProcessorBase
 		@collector.instance_exec(&@on_start) if @on_start
 
 		@last_key = nil
+		@total_input_records = 0
 	end
 
 private
@@ -101,12 +105,14 @@ private
 	def on_data(event)
 		debug{"input: #{event.data}"}
 		if not event.data
+			log "processed #{@total_input_records}"
 			shutdown!
 			@collector.instance_exec(&@on_finish) if @on_finish
 			@each_key_controler.finish if @each_key_controler
 			@collector.flush!
 			return
 		end
+		@total_input_records += 1
 		@collector.instance_exec(*event.data, &@on_each) if @on_each
 
 		if @on_each_key 

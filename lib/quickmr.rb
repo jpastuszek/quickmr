@@ -1,0 +1,2 @@
+require 'quickmr/job'
+
