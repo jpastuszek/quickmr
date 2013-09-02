@@ -8,11 +8,13 @@ private
 
 		last = []
 
+		log "waiting for data in #{queues.length} queues"
 		# initialize last
 		queues.each do |queue|
 			last << queue.pop
 		end
 		
+		log "got first record of each queue, merging..."
 		# pop from queue with lesser key value
 		loop do
 			min = nil
@@ -31,6 +33,7 @@ private
 			last[min] = queues[min].pop
 		end
 
+		log "all #{queues.length} queues done sending data"
 		# end of data
 		output nil if @processor
 		shutdown!

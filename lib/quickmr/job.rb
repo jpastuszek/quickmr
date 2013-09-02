@@ -3,7 +3,8 @@ require 'quickmr/mapper'
 require 'quickmr/splitter'
 require 'quickmr/merger'
 require 'quickmr/reducer'
-require 'quickmr/output'
+require 'quickmr/demultiplexer'
+require 'quickmr/multiplexer'
 require 'quickmr/line_reader'
 
 class Job < ProcessorBase
@@ -58,14 +59,14 @@ class Job < ProcessorBase
 			merger.deliver_message! :flush!, queues
 		end
 
-		@output = spawn(Output, reducer_no: @reducers.length)
+		@output = spawn(Demultiplexer, input_no: @reducers.length)
 		@reducers.each do |reducer|
 			reducer.connect(@output)
 		end
-
 		@output.connect(self, :output)
 
-		@mapping_sequence = 0
+		@input = spawn(Multiplexer)
+		@input.connect(@mappers)
 	end
 
 	def mapper(count, &block)
@@ -89,12 +90,12 @@ class Job < ProcessorBase
 			max_lines = (max_lines.to_f / files.length).ceil
 		end
 
-		serializer = spawn(Output, reducer_no: files.length)
-		serializer.connect(self)
+		input = spawn(Demultiplexer, input_no: files.length)
+		input.connect(self)
 
 		files.each do |file_name|
 			line_reader = spawn(LineRader, max_lines: max_lines)
-			line_reader.connect(serializer)
+			line_reader.connect(input)
 			line_reader.deliver_message! :read_file, file_name
 		end
 	end
@@ -107,7 +108,7 @@ class Job < ProcessorBase
 		deliver_message! :data, nil # flush
 	end
 
-	def done
+	def wait_done
 		while alive? do sleep 0.1 end
 	end
 
@@ -123,14 +124,7 @@ private
 	
 	def on_data(event)
 		debug{"input: #{event.data}"}
-		if not event.data
-			@mappers.each do |mapper|
-				mapper.deliver_message! :data, nil
-			end
-			return
-		end
-		@mappers[@mapping_sequence % @mappers.length].deliver_message! :data, event.data
-		@mapping_sequence += 1
+		@input.deliver_message! :data, event.data
 	end
 
 	def on_output(event)
