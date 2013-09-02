@@ -33,7 +33,11 @@ class ProcessorBase < Tribe::DedicatedActor
 
 	def output(data)
 		fail 'no processor connected' unless @processor and @command
-		debug { "output: #{data}" }
+		if not data
+			debug { "closing output" }
+		else
+			debug { "output: #{data}" }
+		end
 		@processor.deliver_message! @command, data
 	end
 

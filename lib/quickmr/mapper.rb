@@ -15,6 +15,8 @@ class Mapper < ProcessorBase
 	end
 
 	class Collector
+		extend Forwardable
+
 		def initialize(parent, db)
 			@parent = parent
 			@_db = db
@@ -38,6 +40,8 @@ class Mapper < ProcessorBase
 			end
 			@parent.output nil
 		end
+
+		def_delegators :@parent, :log, :debug, :warn
 
 		private
 

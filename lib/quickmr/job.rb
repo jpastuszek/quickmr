@@ -4,6 +4,7 @@ require 'quickmr/splitter'
 require 'quickmr/merger'
 require 'quickmr/reducer'
 require 'quickmr/output'
+require 'quickmr/line_reader'
 
 class Job < ProcessorBase
 	@@job_no = 0
@@ -83,12 +84,30 @@ class Job < ProcessorBase
 		@on_output = block
 	end
 
+	def read_files_by_line(files, max_lines = nil)
+		if max_lines
+			max_lines = (max_lines.to_f / files.length).ceil
+		end
+
+		serializer = spawn(Output, reducer_no: files.length)
+		serializer.connect(self)
+
+		files.each do |file_name|
+			line_reader = spawn(LineRader, max_lines: max_lines)
+			line_reader.connect(serializer)
+			line_reader.deliver_message! :read_file, file_name
+		end
+	end
+
 	def process(key, value)
 		deliver_message!(:data, [key, value])
 	end
 
-	def done
+	def flush!
 		deliver_message! :data, nil # flush
+	end
+
+	def done
 		while alive? do sleep 0.1 end
 	end
 
