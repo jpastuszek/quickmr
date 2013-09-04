@@ -9,21 +9,33 @@ describe Mapper do
 	end
 
 	it 'should produce key value records with given block' do
-		processor = Class.new
+		#processor = Class.new
+		#processor_messages = []
+		#processor.stub(:deliver_message!) {|*args| processor_messages << args}
+
+		#mapper = Tribe.root.spawn(subject)
+		#mapper.connect(processor)
+
+		#(0...10).each do |no|
+			#mapper.deliver_message! :data, [nil, no]
+		#end
+		#mapper.deliver_message! :data, nil # flush
+
+		#while mapper.alive? do sleep 0.1 end
+
+		zmq = ZMQ::Context.new
+
 		processor_messages = []
-		processor.stub(:deliver_message!) {|*args| processor_messages << args}
-
-		mapper = Tribe.root.spawn(subject)
-		mapper.connect(processor)
-
-		(0...10).each do |no|
-			mapper.deliver_message! :data, [nil, no]
+		out = InputPort.new(zmq) do |event|
+			processor_messages << event
 		end
-		mapper.deliver_message! :data, nil # flush
+		
+		mapper = subject.spawn
+		mapper.out[0].connect(out)
 
-		while mapper.alive? do sleep 0.1 end
+		out.poll
 
-		processor_messages.should == [[:data, [0, 0]], [:data, [0, 3]], [:data, [0, 6]], [:data, [1, 1]], [:data, [1, 4]], [:data, [1, 7]], [:data, [2, 2]], [:data, [2, 5]], [:data, [2, 8]], [:data, nil]]
+		#processor_messages.should == [[:data, [0, 0]], [:data, [0, 3]], [:data, [0, 6]], [:data, [1, 1]], [:data, [1, 4]], [:data, [1, 7]], [:data, [2, 2]], [:data, [2, 5]], [:data, [2, 8]], [:data, nil]]
 	end
 end
 
