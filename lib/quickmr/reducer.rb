@@ -35,8 +35,10 @@ class Reducer < ProcessorBase
 		def initialize(collector, &block)
 			@fiber = Fiber.new do
 				loop do
-					@values = Values.new
-					collector.instance_exec(Fiber.yield, @values, &block)
+					values = Values.new
+					key = Fiber.yield
+					break if key == :_finish
+					collector.instance_exec(key, values, &block)
 				end
 			end
 		end
@@ -52,6 +54,7 @@ class Reducer < ProcessorBase
 
 		def finish
 			@fiber.resume :_force_each_stop
+			@fiber.resume :_finish
 		end
 	end
 
@@ -63,12 +66,18 @@ class Reducer < ProcessorBase
 		end
 
 		def each(&block)
-			fail 'values is not rewindable' if @run_once
+			fail 'values are not rewindable' if @run_once
 			@run_once = true
-			loop do
-				value = Fiber.yield
-				break if value == :_force_each_stop
-				yield value
+			begin
+				loop do
+					value = Fiber.yield
+					break if value == :_force_each_stop
+					yield value
+				end
+			rescue
+				# read remainig values so next key can be processed
+				true while Fiber.yield != :_force_each_stop
+				raise
 			end
 		end
 	end

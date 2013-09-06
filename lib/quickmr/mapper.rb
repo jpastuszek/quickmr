@@ -34,22 +34,21 @@ class Mapper < ProcessorBase
 		def flush!
 			@parent.log "collected #{@_total_collections} records; flushing..."
 			# send sorted data by key
-			each do |key, value|
-				@parent.debug{"flushing: #{[key, value]}"}
-				@parent.output [key, value]
+			reader = @_db.cursor
+			reader.jump
+			begin
+				while record = reader.get(true)
+					key, value = *Marshal.load(record[1])
+					@parent.debug{"flushing: #{[key, value]}"}
+					@parent.output [key, value]
+				end
+			ensure
+				reader.disable
+				@parent.output nil
 			end
-			@parent.output nil
 		end
 
 		def_delegators :@parent, :log, :debug, :warn
-
-		private
-
-		def each
-			@_db.each do |key, pair|
-				yield *Marshal.load(pair)
-			end
-		end
 	end
 
 	def initialize(options)

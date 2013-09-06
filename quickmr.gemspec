@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "quickmr"
-  s.version = "0.0.0"
+  s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jakub Pastuszek"]
-  s.date = "2013-08-30"
+  s.date = "2013-09-04"
   s.description = "In porcess multithreaded map-reduce framework"
   s.email = "jpastuszek@gmail.com"
   s.extra_rdoc_files = [
@@ -24,20 +24,26 @@ Gem::Specification.new do |s|
     "LICENSE.txt",
     "README.rdoc",
     "Rakefile",
+    "VERSION",
     "features/quickmr.feature",
     "features/step_definitions/quickmr_steps.rb",
     "features/support/env.rb",
     "lib/quickmr.rb",
+    "lib/quickmr/demultiplexer.rb",
     "lib/quickmr/job.rb",
+    "lib/quickmr/line_reader.rb",
     "lib/quickmr/mapper.rb",
     "lib/quickmr/merger.rb",
-    "lib/quickmr/output.rb",
+    "lib/quickmr/multiplexer.rb",
     "lib/quickmr/processor_base.rb",
     "lib/quickmr/reducer.rb",
     "lib/quickmr/splitter.rb",
+    "quickmr.gemspec",
+    "spec/demultiplexer_spec.rb",
     "spec/job_spec.rb",
     "spec/mapper_spec.rb",
     "spec/merger_spec.rb",
+    "spec/multiplexer_spec.rb",
     "spec/reducer_spec.rb",
     "spec/spec_helper.rb",
     "spec/splitter_spec.rb"
