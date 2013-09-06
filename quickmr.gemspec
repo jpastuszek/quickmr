@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jakub Pastuszek"]
-  s.date = "2013-09-04"
+  s.date = "2013-09-06"
   s.description = "In porcess multithreaded map-reduce framework"
   s.email = "jpastuszek@gmail.com"
   s.extra_rdoc_files = [
@@ -60,6 +60,7 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<cli>, ["~> 1.1.0"])
       s.add_runtime_dependency(%q<tribe>, ["~> 0.4"])
+      s.add_runtime_dependency(%q<ffi-rzmq>, ["~> 1.0"])
       s.add_runtime_dependency(%q<kyotocabinet-ruby>, ["~> 1.27"])
       s.add_development_dependency(%q<rspec>, ["~> 2.13"])
       s.add_development_dependency(%q<rspec-mocks>, ["~> 2.13"])
@@ -69,6 +70,7 @@ Gem::Specification.new do |s|
     else
       s.add_dependency(%q<cli>, ["~> 1.1.0"])
       s.add_dependency(%q<tribe>, ["~> 0.4"])
+      s.add_dependency(%q<ffi-rzmq>, ["~> 1.0"])
       s.add_dependency(%q<kyotocabinet-ruby>, ["~> 1.27"])
       s.add_dependency(%q<rspec>, ["~> 2.13"])
       s.add_dependency(%q<rspec-mocks>, ["~> 2.13"])
@@ -79,6 +81,7 @@ Gem::Specification.new do |s|
   else
     s.add_dependency(%q<cli>, ["~> 1.1.0"])
     s.add_dependency(%q<tribe>, ["~> 0.4"])
+    s.add_dependency(%q<ffi-rzmq>, ["~> 1.0"])
     s.add_dependency(%q<kyotocabinet-ruby>, ["~> 1.27"])
     s.add_dependency(%q<rspec>, ["~> 2.13"])
     s.add_dependency(%q<rspec-mocks>, ["~> 2.13"])
